@@ -14,8 +14,6 @@ function sayHi() {
 }
 
 
-
-
 intervalId = setInterval(sayHi, 1000)
 
 console.log("intervalID:", intervalId)
