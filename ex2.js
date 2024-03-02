@@ -25,8 +25,3 @@ console.log("1997 is", determineLeapYear(1997) ? "" : "not", "leap year")
 console.log("1996 is", determineLeapYear(1996) ? "" : "not", "leap year")
 console.log("1900 is", determineLeapYear(1900) ? "" : "not", "leap year")
 
-// if(determineLeapYear(2000)){
-
-// }else{
-
-// }
