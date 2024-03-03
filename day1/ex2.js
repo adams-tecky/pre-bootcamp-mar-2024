@@ -10,7 +10,7 @@ function determineLeapYear(yearInput) {
             if (yearInput % 400 == 0)
                 return true
             else
-                return false
+                return false 
 
         } else {
             return true
