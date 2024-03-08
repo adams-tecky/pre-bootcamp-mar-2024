@@ -3,7 +3,7 @@ const WIDTH = window.innerWidth - 30
 
 let foods = []
 let obstacles = []
-
+let bullets = []
 let enemies = []
 let generateFoodIntervalId
 let countDownIntervalId
@@ -30,9 +30,7 @@ function setup() {
 
 function draw() {
 
-
     background(220)
-
 
     let statusText = ""
     if (flag) {
@@ -70,7 +68,12 @@ function draw() {
 
     }
     if (keyIsDown(LEFT_ARROW)) {
-        player.x = Math.max(player.x - player.v, player.d / 2)
+
+        if (checkCircleCollision(player.x - player.v, player.y, player.d / 2, obstacles[0].x, obstacles[0].y, obstacles[0].d / 2)) {
+
+        } else {
+            player.x = Math.max(player.x - player.v, player.d / 2)
+        }
     }
 
     if (keyIsDown(UP_ARROW)) {
@@ -81,7 +84,11 @@ function draw() {
         }
     }
     if (keyIsDown(DOWN_ARROW)) {
-        player.y = Math.min(player.y + player.v, HEIGHT - player.d / 2)
+        if (checkCircleCollision(player.x, player.y + player.v, player.d / 2, obstacles[0].x, obstacles[0].y, obstacles[0].d / 2)) {
+
+        } else {
+            player.y = Math.min(player.y + player.v, HEIGHT - player.d / 2)
+        }
     }
 
     // <<<<<<<<<<<<<<<<<<
@@ -106,13 +113,13 @@ function draw() {
 
     foods = resultArray
 
+    updateAndDrawBullets()
 
     fill('red')
     circle(player.x, player.y, player.d)
 
 
     for (let entry of foods) {
-
         fill('brown')
         circle(entry.x, entry.y, entry.d)
     }
@@ -121,25 +128,17 @@ function draw() {
     fill("yellow")
     circle(obstacles[0].x, obstacles[0].y, obstacles[0].d)
 
-    let dice = Math.random()
-
-    console.log(dice)
-    if (dice > 0.3 && dice < 0.5) {
-        // move right
-        enemies[0].x = Math.min(enemies[0].x + enemies[0].v, WIDTH - enemies[0].d / 2)
-    } else if (dice > 0.5 && dice < 0.7) {
-        // move left
-        enemies[0].x = Math.max(enemies[0].x - enemies[0].v, enemies[0].d / 2)
-    } else if (dice > 0.7 && dice < 0.9) {
-        // move up
-        enemies[0].y = Math.max(enemies[0].y - enemies[0].v, enemies[0].d / 2)
-    } else if (dice > 0.9) {
-        enemies[0].y = Math.min(enemies[0].y + enemies[0].v, HEIGHT - enemies[0].d / 2)
-    }
+    updateEnemyBehavior()
 
     fill("blue")
     circle(enemies[0].x, enemies[0].y, enemies[0].d)
 
+}
+
+function keyPressed() {
+    if (keyCode === 32) { // Space bar
+        shootBullet();
+    }
 }
 
 function checkCircleCollision(x1, y1, r1, x2, y2, r2) {
@@ -217,7 +216,65 @@ function generateEnemies() {
         x: WIDTH / 2,
         y: HEIGHT / 4,
         d: 30,
-        v: 5
+        v: 2
     })
 
+}
+
+function updateEnemyBehavior() {
+    enemies.forEach(enemy => {
+        // Calculate direction towards the player
+        let dx = player.x - enemy.x;
+        let dy = player.y - enemy.y;
+        let magnitude = Math.sqrt(dx * dx + dy * dy);
+
+        // Normalize the direction
+        if (magnitude > 0) {
+            dx /= magnitude;
+            dy /= magnitude;
+        }
+
+        // Move enemy towards the player with current velocity
+        enemy.x += dx * enemy.v;
+        enemy.y += dy * enemy.v;
+    });
+}
+
+
+function createBullet(x, y, vx, vy) {
+    return {
+        x: x,
+        y: y,
+        vx: vx,
+        vy: vy,
+        d: 5 // diameter of the bullet
+    };
+}
+
+
+function shootBullet() {
+    let bulletSpeed = 3; // Adjust speed as necessary
+    let bullet = createBullet(player.x, player.y, bulletSpeed, 0); // Adjust vx, vy for direction
+    bullets.push(bullet);
+}
+
+
+function updateAndDrawBullets() {
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        let b = bullets[i];
+        // Update bullet position
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Check for collision with enemies or obstacles here
+        // If bullet hits or goes off screen, remove it from the array
+        if (b.x > WIDTH || b.x < 0 || b.y > HEIGHT || b.y < 0) {
+            bullets.splice(i, 1);
+            continue;
+        }
+
+        // Draw bullet
+        fill('black'); // Bullet color
+        circle(b.x, b.y, b.d);
+    }
 }
